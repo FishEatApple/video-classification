@@ -11,8 +11,8 @@ import pandas as pd
 import pickle
 
 # set path
-data_path = "./jpegs_256/"                # define UCF-101 RGB data path
-action_name_path = "./UCF101actions.pkl"
+data_path = "/home/gjj/data/jpegs_256"                # define UCF-101 RGB data path
+action_name_path = "./_UCF101actions.pkl"
 save_model_path = "./ResNetCRNN_ckpt/"
 
 # use same encoder CNN saved!
@@ -91,8 +91,8 @@ cnn_encoder = ResCNNEncoder(fc_hidden1=CNN_fc_hidden1, fc_hidden2=CNN_fc_hidden2
 rnn_decoder = DecoderRNN(CNN_embed_dim=CNN_embed_dim, h_RNN_layers=RNN_hidden_layers, h_RNN=RNN_hidden_nodes, 
                          h_FC_dim=RNN_FC_dim, drop_p=dropout_p, num_classes=k).to(device)
 
-cnn_encoder.load_state_dict(torch.load(os.path.join(save_model_path, 'cnn_encoder_epoch41.pth')))
-rnn_decoder.load_state_dict(torch.load(os.path.join(save_model_path, 'rnn_decoder_epoch41.pth')))
+cnn_encoder.load_state_dict(torch.load(os.path.join(save_model_path, 'cnn_encoder_epoch63_singleGPU.pth')))
+rnn_decoder.load_state_dict(torch.load(os.path.join(save_model_path, 'rnn_decoder_epoch63_singleGPU.pth')))
 print('CRNN model reloaded!')
 
 

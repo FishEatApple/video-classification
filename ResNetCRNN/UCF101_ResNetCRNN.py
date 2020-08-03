@@ -16,8 +16,8 @@ from sklearn.metrics import accuracy_score
 import pickle
 
 # set path
-data_path = "./jpegs_256/"    # define UCF-101 RGB data path
-action_name_path = './UCF101actions.pkl'
+data_path = "/home/gjj/data/jpegs_256"    # define UCF-101 RGB data path
+action_name_path = './_UCF101actions.pkl'
 save_model_path = "./ResNetCRNN_ckpt/"
 
 # EncoderCNN architecture

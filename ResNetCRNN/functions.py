@@ -22,6 +22,8 @@ def onehot2labels(label_encoder, y_onehot):
 def cat2labels(label_encoder, y_cat):
     return label_encoder.inverse_transform(y_cat).tolist()
 
+def cat2labels_detect(label_encoder, y_cat):
+    return label_encoder.inverse_transform(y_cat)
 
 ## ---------------------- Dataloaders ---------------------- ##
 # for 3DCNN
@@ -42,7 +44,8 @@ class Dataset_3DCNN(data.Dataset):
     def read_images(self, path, selected_folder, use_transform):
         X = []
         for i in self.frames:
-            image = Image.open(os.path.join(path, selected_folder, 'frame{:06d}.jpg'.format(i))).convert('L')
+            _path=os.path.join(path, selected_folder, '{:06d}.jpg'.format(i))
+            image = Image.open(_path).convert('L')
 
             if use_transform is not None:
                 image = use_transform(image)
@@ -83,7 +86,7 @@ class Dataset_CRNN(data.Dataset):
     def read_images(self, path, selected_folder, use_transform):
         X = []
         for i in self.frames:
-            image = Image.open(os.path.join(path, selected_folder, 'frame{:06d}.jpg'.format(i)))
+            image = Image.open(os.path.join(path, selected_folder, '{:06d}.jpg'.format(i)))
 
             if use_transform is not None:
                 image = use_transform(image)
@@ -107,7 +110,18 @@ class Dataset_CRNN(data.Dataset):
 
 ## ---------------------- end of Dataloaders ---------------------- ##
 
+def Img_trans_2_detect(path, selected_folder,frames, use_transform):
+    X = []
+    for i in frames:
+        image = Image.open(os.path.join(path, selected_folder, '{:06d}.jpg'.format(i)))
 
+        if use_transform is not None:
+            image = use_transform(image)
+
+        X.append(image)
+    X = torch.stack(X, dim=0)
+
+    return X
 
 ## -------------------- (reload) model prediction ---------------------- ##
 def Conv3d_final_prediction(model, device, loader):
@@ -140,6 +154,21 @@ def CRNN_final_prediction(model, device, loader):
             all_y_pred.extend(y_pred.cpu().data.squeeze().numpy().tolist())
 
     return all_y_pred
+
+def CRNN_detect_prediction(model, device, frames):
+    cnn_encoder, rnn_decoder = model
+    cnn_encoder.eval()
+    rnn_decoder.eval()
+
+    all_y_pred = []
+    with torch.no_grad():
+        # distribute data to device
+        frames = frames.to(device)
+        output = rnn_decoder(cnn_encoder(frames))
+        y_pred = output.max(1, keepdim=True)[1]  # location of max log-probability as prediction
+        # all_y_pred.extend(y_pred.cpu().data.squeeze().numpy().tolist())
+
+    return y_pred.cpu().data.numpy()
 
 ## -------------------- end of model prediction ---------------------- ##
 
